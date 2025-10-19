@@ -10,11 +10,19 @@ source = {
 	Items.Power:	Entities.Sunflower
 }
 # ---------------------------------------------------------
+# 收获
 def harv():
 	if can_harvest():
 		return harvest()
 	return False
 
+# 浇水，阈值手动配
+def water():
+	if get_water() < 0.5:
+		return use_item(Items.Water)
+	return False
+
+# 移动到指定位置
 def moveTo(p):
 	x, y = get_pos_x(), get_pos_y()
 	x1, y1 = p
@@ -40,7 +48,8 @@ def moveTo(p):
 		move(hor_dir)
 	for i in range(ver_step):
 		move(ver_dir)
-		
+
+# 计算距离	
 def getDistance(p1, p2):
 	x1, y1 = p1
 	x2, y2 = p2
@@ -48,6 +57,7 @@ def getDistance(p1, p2):
 	dy = min(abs(y2 - y1), size - abs(y2 - y1))
 	return dx + dy
 
+# 路径遍历导航
 def sortPosByDistance(posList):
 	sorted = []
 	unvisited = []
@@ -184,6 +194,7 @@ def plantSunflower():
 			if get_ground_type() != Grounds.Soil:
 				till()
 			plant(Entities.Sunflower)
+			water()
 			colCount.append(measure())
 			move(North)
 		petalCount.append(colCount)
@@ -204,10 +215,8 @@ def plantSunflower():
 			continue
 		tileList = groupTiles[p]
 		
-		# 排序
 		sortedList = sortPosByDistance(tileList)
 		
-		# 收获
 		for pos in sortedList:
 			moveTo(pos)
 			harv()
@@ -215,13 +224,65 @@ def plantSunflower():
 	# 无人机复位
 	moveTo([0, 0])
 
+def plantCactus():
+	# 第一遍犁地
+	for i in range(size):
+		for j in range(size):
+			harv()
+			if get_ground_type() != Grounds.Soil:
+				till()
+			plant(Entities.Cactus)
+			move(North)
+		move(East)
+	
+	# 按行冒泡
+	for j in range(size):
+		moveTo([0, j])
+
+		for m in range(size):
+			moveTo([0, j])
+			ifSwapped = False
+			for n in range(size - m - 1):
+				currentSize = measure()
+				nextSize = measure(East)
+				if currentSize > nextSize:
+					swap(East)
+					ifSwapped = True
+				if n < size - m - 2:
+					move(East)
+			if ifSwapped == False:
+				break
+	
+	# 按列冒泡
+	for i in range(size):
+		moveTo([i, 0])
+
+		for m in range(size):
+			moveTo([i, 0])
+			ifSwapped = False
+			for n in range(size - m - 1):
+				currentSize = measure()
+				nextSize = measure(North)
+				if currentSize > nextSize:
+					swap(North)
+					ifSwapped = True
+				if n < size - m - 2:
+					move(North)
+			if ifSwapped == False:
+				break
+	
+	# 无人机复位
+	moveTo([0, 0])
 # ---------------------------------------------------------
 def main():
 	clear()
 	
 	while True:
 		# target update
-		target = targetUpdate(Items.Pumpkin)
+		if num_items(Items.Power) < 1000:
+			target = targetUpdate(Items.Power)
+		else:
+			target = targetUpdate(Items.Cactus)
 		
 		plantFarm(target)
 # ---------------------------------------------------------
