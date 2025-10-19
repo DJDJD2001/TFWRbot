@@ -288,19 +288,19 @@ def dinomove(direction):
 def doDinosaur():
 	change_hat(Hats.Dinosaur_Hat)
 	dinomove(North)
-	for i in range(size - 1):
-		if i % 2 == 0:
-			for j in range(1, size - 1):
-				dinomove(North)
-		else:
-			for j in range(1, size - 1):
-				dinomove(South)
-		dinomove(East)
-	for j in range(size - 1):
-		dinomove(South)
-	for i in range(size - 1):
-		dinomove(West)
-	change_hat(Hats.Purple_Hat)
+	while True:
+		for i in range(size - 1):
+			if i % 2 == 0:
+				for j in range(1, size - 1):
+					dinomove(North)
+			else:
+				for j in range(1, size - 1):
+					dinomove(South)
+			dinomove(East)
+		for j in range(size - 1):
+			dinomove(South)
+		for i in range(size - 1):
+			dinomove(West)
 # ---------------------------------------------------------
 def main():
 	clear()
