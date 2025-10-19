@@ -7,7 +7,8 @@ source = {
 	Items.Carrot:	Entities.Carrot,
 	Items.Pumpkin:	Entities.Pumpkin,
 	Items.Cactus:	Entities.Cactus,
-	Items.Power:	Entities.Sunflower
+	Items.Power:	Entities.Sunflower,
+	Items.Bone:		Entities.Apple
 }
 # ---------------------------------------------------------
 # 收获
@@ -110,6 +111,8 @@ def plantFarm(target):
 		plantCactus()
 	elif target == Items.Power:
 		plantSunflower()
+	elif target == Items.Bone:
+		doDinosaur()
 # ---------------------------------------------------------
 def plantGrass():
 	for i in range(size):
@@ -273,6 +276,31 @@ def plantCactus():
 	
 	# 无人机复位
 	moveTo([0, 0])
+
+def dinomove(direction):
+	harv()
+	if move(direction) == False:
+		change_hat(Hats.Purple_Hat)
+		moveTo([0, 0])
+		return False
+	return True
+
+def doDinosaur():
+	change_hat(Hats.Dinosaur_Hat)
+	dinomove(North)
+	for i in range(size - 1):
+		if i % 2 == 0:
+			for j in range(1, size - 1):
+				dinomove(North)
+		else:
+			for j in range(1, size - 1):
+				dinomove(South)
+		dinomove(East)
+	for j in range(size - 1):
+		dinomove(South)
+	for i in range(size - 1):
+		dinomove(West)
+	change_hat(Hats.Purple_Hat)
 # ---------------------------------------------------------
 def main():
 	clear()
@@ -282,7 +310,7 @@ def main():
 		if num_items(Items.Power) < 1000:
 			target = targetUpdate(Items.Power)
 		else:
-			target = targetUpdate(Items.Cactus)
+			target = targetUpdate(Items.Bone)
 		
 		plantFarm(target)
 # ---------------------------------------------------------
