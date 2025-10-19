@@ -276,7 +276,7 @@ def plantCactus():
 	
 	# 无人机复位
 	moveTo([0, 0])
-
+# ---------------------------------------------------------
 def dinomove(direction):
 	harv()
 	if move(direction) == False:
@@ -287,20 +287,65 @@ def dinomove(direction):
 
 def doDinosaur():
 	change_hat(Hats.Dinosaur_Hat)
-	dinomove(North)
 	while True:
+		if dinomove(North) == False:
+			return
 		for i in range(size - 1):
 			if i % 2 == 0:
 				for j in range(1, size - 1):
-					dinomove(North)
+					if dinomove(North) == False:
+						return
 			else:
 				for j in range(1, size - 1):
-					dinomove(South)
-			dinomove(East)
+					if dinomove(South) == False:
+						return
+			if dinomove(East) == False:
+				return
 		for j in range(size - 1):
-			dinomove(South)
+			if dinomove(South) == False:
+				return
 		for i in range(size - 1):
-			dinomove(West)
+			if dinomove(West) == False:
+				return
+# ---------------------------------------------------------
+def polyplant(entity):
+	if entity == Entities.Grass:
+		if get_ground_type() != Grounds.Grassland:
+			till()
+	else:
+		if get_ground_type() != Grounds.Soil:
+			till()
+	plant(entity)
+
+def polyculture(item = Items.Hay):
+	plan = []
+	target = source[item]
+	# 初始化
+	for i in range(size):
+		colPlan = []
+		for j in range(size):
+			colPlan.append(Entities.Dead_Pumpkin)
+		plan.append(colPlan)
+
+	for i in range(size):
+		for j in range(size):
+			harv()
+
+			if plan[i][j] == Entities.Dead_Pumpkin:
+				plan[i][j] = target
+
+			for m in range(10): # 最多尝试10次
+				polyplant(plan[i][j])
+
+				plantType, (x, y) = get_companion()
+				if plan[x][y] == Entities.Dead_Pumpkin or plan[x][y] == plantType:
+					plan[x][y] = plantType
+					break
+				else:
+					# 换种
+					harvest()
+			move(North)
+		move(East)
 # ---------------------------------------------------------
 def main():
 	clear()
@@ -312,7 +357,10 @@ def main():
 		else:
 			target = targetUpdate(Items.Bone)
 		
-		plantFarm(target)
+		if (target == Items.Hay or target == Items.Wood or target == Items.Carrot) and num_items(Items.Hay) > size * size * 2 and num_items(Items.Wood) > size * size * 2:
+			polyculture(target)
+		else:
+			plantFarm(target)
 # ---------------------------------------------------------
 if __name__ == "__main__":
 	main()
