@@ -317,12 +317,8 @@ def doDinosaur():
 				return
 # ---------------------------------------------------------
 def polyplant(entity):
-	if entity == Entities.Grass:
-		if get_ground_type() != Grounds.Grassland:
-			till()
-	else:
-		if get_ground_type() != Grounds.Soil:
-			till()
+	if get_ground_type() != Grounds.Soil:
+		till()
 	plant(entity)
 
 def polyculture(item = Items.Hay):
@@ -385,7 +381,7 @@ def main():
 			target = targetUpdate(Items.Power)
 		else:
 			target = targetUpdate(Items.Gold)
-			
+
 		current_tick = get_tick_count()
 		plantFarm(target)
 		new_tick = get_tick_count()
