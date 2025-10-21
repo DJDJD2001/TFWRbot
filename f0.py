@@ -2,13 +2,14 @@
 size = get_world_size()
 
 source = {
-	Items.Hay:		Entities.Grass,
-	Items.Wood:		Entities.Tree,
-	Items.Carrot:	Entities.Carrot,
-	Items.Pumpkin:	Entities.Pumpkin,
-	Items.Cactus:	Entities.Cactus,
-	Items.Power:	Entities.Sunflower,
-	Items.Bone:		Entities.Apple
+	Items.Hay:				Entities.Grass,
+	Items.Wood:				Entities.Tree,
+	Items.Carrot:			Entities.Carrot,
+	Items.Pumpkin:			Entities.Pumpkin,
+	Items.Cactus:			Entities.Cactus,
+	Items.Power:			Entities.Sunflower,
+	Items.Bone:				Entities.Apple,
+	Items.Gold:				Entities.Treasure
 }
 # ---------------------------------------------------------
 # 收获
@@ -85,13 +86,15 @@ def sortPosByDistance(posList):
 def targetUpdate(target = Items.Hay):
 	if target == Items.Hay or target == Items.Wood:
 		return target
+	elif target == Items.Weird_Substance:
+		return target
 	else:
 		cost = get_cost(source[target])
 		
 		# 南瓜特判
 		if target == Items.Pumpkin:
 			cost[Items.Carrot] = cost[Items.Carrot] * 2
-		
+
 		for i in cost:
 			if num_items(i) < cost[i] * size * size:
 				return targetUpdate(i)
@@ -99,7 +102,9 @@ def targetUpdate(target = Items.Hay):
 				return target
 # ---------------------------------------------------------
 def plantFarm(target):
-	if target == Items.Hay:
+	if (target == Items.Hay or target == Items.Wood or target == Items.Carrot or target == Items.Weird_Substance) and num_items(Items.Hay) > size * size * 2 and num_items(Items.Wood) > size * size * 2:
+		polyculture(target)
+	elif target == Items.Hay:
 		plantGrass()
 	elif target == Items.Wood:
 		plantTree()
@@ -113,6 +118,9 @@ def plantFarm(target):
 		plantSunflower()
 	elif target == Items.Bone:
 		doDinosaur()
+	elif target == Items.Gold:
+		doMaze()
+	
 # ---------------------------------------------------------
 def plantGrass():
 	for i in range(size):
@@ -319,7 +327,12 @@ def polyplant(entity):
 
 def polyculture(item = Items.Hay):
 	plan = []
-	target = source[item]
+	ifFertilizer = False
+	if item == Items.Weird_Substance:
+		target = Entities.Carrot
+		ifFertilizer = True
+	else:
+		target = source[item]
 	# 初始化
 	for i in range(size):
 		colPlan = []
@@ -334,33 +347,46 @@ def polyculture(item = Items.Hay):
 			if plan[i][j] == Entities.Dead_Pumpkin:
 				plan[i][j] = target
 
-			for m in range(10): # 最多尝试10次
+			for m in range(20): # 最多尝试20次
 				polyplant(plan[i][j])
 
 				plantType, (x, y) = get_companion()
-				if plan[x][y] == Entities.Dead_Pumpkin or plan[x][y] == plantType:
+				if plan[x][y] == Entities.Dead_Pumpkin:
 					plan[x][y] = plantType
 					break
 				else:
 					# 换种
 					harvest()
+			if ifFertilizer:
+				use_item(Items.Fertilizer)
 			move(North)
 		move(East)
+# ---------------------------------------------------------
+def doMaze():
+	substance_count = 2**(num_unlocked(Unlocks.Mazes) - 1)
+	for i in range(size):
+		for j in range(size):
+			if can_harvest() and get_entity_type() == Entities.Bush:
+				use_item(Items.Weird_Substance, substance_count)
+				harv()
+				plant(Entities.Bush)
+			else:
+				harv()
+				plant(Entities.Bush)
+			move(North)
+		move(East)	
 # ---------------------------------------------------------
 def main():
 	clear()
 	
 	while True:
 		# target update
-		if num_items(Items.Power) < 1000:
+		if num_items(Items.Power) < 10000:
 			target = targetUpdate(Items.Power)
 		else:
-			target = targetUpdate(Items.Bone)
-		
-		if (target == Items.Hay or target == Items.Wood or target == Items.Carrot) and num_items(Items.Hay) > size * size * 2 and num_items(Items.Wood) > size * size * 2:
-			polyculture(target)
-		else:
-			plantFarm(target)
+			target = targetUpdate(Items.Gold)
+	
+		plantFarm(target)
 # ---------------------------------------------------------
 if __name__ == "__main__":
 	main()
