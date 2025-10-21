@@ -226,9 +226,9 @@ def plantSunflower():
 			continue
 		tileList = groupTiles[p]
 		
-		sortedList = sortPosByDistance(tileList)
+		# sortedList = sortPosByDistance(tileList)
 		
-		for pos in sortedList:
+		for pos in tileList:
 			moveTo(pos)
 			harv()
 			
@@ -385,8 +385,11 @@ def main():
 			target = targetUpdate(Items.Power)
 		else:
 			target = targetUpdate(Items.Gold)
-	
+			
+		current_tick = get_tick_count()
 		plantFarm(target)
+		new_tick = get_tick_count()
+		quick_print("Target: ", target, "Tick used: ", new_tick - current_tick)
 # ---------------------------------------------------------
 if __name__ == "__main__":
 	main()
